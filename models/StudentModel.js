@@ -2,29 +2,42 @@ const conn = require('../config/conn');
 
 class Student {
   static async login(nisn, password, kelas) {
+    console.log('NISN:', nisn);
+    console.log('Password:', password);
+    console.log('Kelas:', kelas);
+  
     try {
       let table = '';
       if (kelas.startsWith('X')) {
-        table = 'tbl_login_x_rpl';
+        table = 'tbl_login_x_rpl';  
       } else if (kelas.startsWith('XI')) {
         table = 'tbl_login_xi_rpl';
       } else if (kelas.startsWith('XII')) {
         table = 'tbl_login_xii_rpl';
       }
-
+  
+      if (!table) {
+        throw new Error('Kelas tidak valid. Tidak dapat menentukan tabel login.');
+      }
+  
       const [rows] = await conn.execute(
         `SELECT s.*, l.* FROM ${table} l 
          JOIN tbl_siswa s ON s.nisn = l.nisn 
-         WHERE l.nisn = ? AND l.password = ? AND l.kelas = ?`,
-        [nisn, password, kelas]
+         WHERE l.nisn = ? AND l.password = ?`,
+        [nisn, password]
       );
-
+  
+      if (rows.length === 0) {
+        throw new Error('Login gagal. Data tidak ditemukan.');
+      }
+  
       return rows[0];
     } catch (error) {
+      console.error('Error:', error.message);
       throw error;
     }
   }
-
+  
   static async generateQueue(nisn, kelas, tanggal) {
     try {
       let table = '';
