@@ -92,14 +92,11 @@ class StudentController {
       // Data credential yang akan disimpan
       const credential = {
         nisn: userData.nisn,
-        kelas: kelas,
-        token: token,
+        kelas: userData.kelas,
       };
   
-      console.log(credential);
-  
       // Set cookie untuk credential
-      res.cookie("credential", JSON.stringify(credential), {
+      res.cookie("credential", credential, {
         httpOnly: false, // Agar bisa diakses oleh JavaScript client
         secure: false,
         maxAge: 24 * 60 * 60 * 1000, // 24 jam
@@ -109,7 +106,7 @@ class StudentController {
       req.session.user = {
         id: userData.id,
         nisn: userData.nisn,
-        kelas: kelas,
+        kelas: userData.kelas,
       };
   
       // Set cookie dengan token
@@ -121,8 +118,9 @@ class StudentController {
   
       // Set Authorization header
       res.setHeader('Authorization', `Bearer ${token}`);
+      console.log(userData)
   
-      res.json({
+      res.status(200).json({
         status: "success",
         message: "Login berhasil",
         user: userData,
